@@ -55,7 +55,7 @@ __attribute__((nonnull(2, 3, 4, 5))) static void merge_final(
     struct list_head *b)
 {
     struct list_head *tail = head;
-    unsigned short count = 0;
+    unsigned char count = 0;
 
     for (;;) {
         /* if equal, take 'a' -- important for sort stability */
