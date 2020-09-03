@@ -4,23 +4,19 @@
 #include "list_sort.h"
 
 struct debug_el {
-    unsigned int poison1;
     struct list_head list;
-    unsigned int poison2;
     int value;
     unsigned serial;
 };
 
-#define TEST_POISON1 0xDEADBEEF
-#define TEST_POISON2 0xA324354C
-#define TEST_LIST_LEN (512 + 128 + 2) /* not including head */
+#define TEST_LIST_LEN (12) /* not including head */
 
 static int cmp(void *priv, struct list_head *a, struct list_head *b)
 {
     struct debug_el *ela, *elb;
 
     ela = container_of(a, struct debug_el, list);
-    elb = container_of(b, struct debug_el, list);
+    elb = list_entry(b, struct debug_el, list);
 
     return ela->value - elb->value;
 }
@@ -28,7 +24,7 @@ static int cmp(void *priv, struct list_head *a, struct list_head *b)
 int main(int argc, char const *argv[])
 {
     int i, count = 1, err = -1;
-    struct debug_el *el;
+    struct debug_el *el, *tmp;
     struct list_head *cur;
 
     srand(time(NULL));  // Initialization, should only be called once.
@@ -42,23 +38,40 @@ int main(int argc, char const *argv[])
         /* force some equivalencies */
         el->value = rand();
         el->serial = i;
-        el->poison1 = TEST_POISON1;
-        el->poison2 = TEST_POISON2;
         list_add_tail(&el->list, &head);
     }
+
+    el = malloc(sizeof(*el));
+    if (!el)
+        goto exit;
+
+    /* force some equivalencies */
+    el->value = rand();
+    el->serial = -1;
+
+    list_add(&el->list, &head);
+
+    list_for_each_entry(tmp, &head, list) {
+        printf("serial %3d random value %d\n", tmp->serial, tmp->value);
+    }
+
+    printf("sort ...\n");
     list_sort(NULL, &head, cmp);
 
-    for (cur = head.next; cur->next != &head; cur = cur->next) {
-        struct debug_el *ela = container_of(cur, struct debug_el, list);
-        printf("%d\n", ela->value);
-    }
-exit:
+    printf("delete and free serial %3d random value %d\n", el->serial, el->value);
+    list_del(&el->list);
+    free(el);
+    el = NULL;
 
-    for (cur = head.next->next; cur != &head; cur = cur->next) {
-        struct debug_el *ela = container_of(cur->prev, struct debug_el, list);
-        free(ela);
+    list_for_each_entry(el, &head, list) {
+        printf("sorted value %10d serial %3d\n", el->value, el->serial);
     }
-    struct debug_el *ela = container_of(cur->prev, struct debug_el, list);
-    free(ela);
+
+exit:
+    list_for_each_entry_safe(el, tmp, &head, list) {
+        printf("free serial %d\n", el->serial);
+        free(el);
+    }
+
     return 0;
 }
