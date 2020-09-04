@@ -4,15 +4,6 @@
 
 #include "list.h"
 
-struct list_head;
-
-#ifndef likely
-#define likely(x) __builtin_expect(!!(x), 1)
-#endif
-#ifndef unlikely
-#define unlikely(x) __builtin_expect((x), 0)
-#endif
-
 __attribute__((nonnull(2, 3))) void list_sort(void *priv,
                                               struct list_head *head,
                                               int (*cmp)(void *priv,

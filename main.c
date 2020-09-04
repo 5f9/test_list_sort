@@ -51,24 +51,28 @@ int main(int argc, char const *argv[])
 
     list_add(&el->list, &head);
 
-    list_for_each_entry(tmp, &head, list) {
+    list_for_each_entry(tmp, &head, list)
+    {
         printf("serial %3d random value %d\n", tmp->serial, tmp->value);
     }
 
     printf("sort ...\n");
     list_sort(NULL, &head, cmp);
 
-    printf("delete and free serial %3d random value %d\n", el->serial, el->value);
+    printf("delete and free serial %3d random value %d\n", el->serial,
+           el->value);
     list_del(&el->list);
     free(el);
     el = NULL;
 
-    list_for_each_entry(el, &head, list) {
+    list_for_each_entry(el, &head, list)
+    {
         printf("sorted value %10d serial %3d\n", el->value, el->serial);
     }
 
 exit:
-    list_for_each_entry_safe(el, tmp, &head, list) {
+    list_for_each_entry_safe(el, tmp, &head, list)
+    {
         printf("free serial %d\n", el->serial);
         free(el);
     }

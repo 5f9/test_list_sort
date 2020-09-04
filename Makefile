@@ -7,7 +7,7 @@ PWD := $(shell pwd)
 all: main
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
-main: main.c list_sort.c
+main: main.c list_sort.c list.h list_sort.h compiler.h compiler-gcc.h
 	$(CC) -O0 -g -o main main.c list_sort.c
 
 load:
